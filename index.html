@@ -14,23 +14,14 @@
         .video-section { height: 100vh; snap-align: start; position: relative; display: flex; align-items: center; background: #000; }
         video { width: 100%; height: 100%; object-fit: cover; }
         .view-hidden { display: none !important; }
-        
-        /* Панель комментов */
         #commentPanel { transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 200; }
         #commentPanel.active { transform: translateY(0); }
-        
-        /* Анимация лайка */
         .heart-pop { position: absolute; pointer-events: none; color: #ff2d55; fill: #ff2d55; animation: pop 0.6s ease-out forwards; z-index: 100; }
         @keyframes pop { 0% { transform: scale(0); opacity: 0; } 50% { transform: scale(1.6); opacity: 1; } 100% { transform: scale(1.2); opacity: 0; } }
-        
         .nav-item.active { color: white; }
-
-        /* Сетка профиля */
         .profile-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; width: 100%; }
         .grid-item { aspect-ratio: 3/4; background: #111; overflow: hidden; }
-
-        /* Кнопка подписки в ленте */
-        .sub-badge { position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); background: #ff2d55; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border: 2px solid black; pointer-events: auto; cursor: pointer; }
+        .sub-badge { position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); background: #ff2d55; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border: 2px solid black; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -39,169 +30,201 @@
         <header class="fixed top-0 w-full flex justify-center py-4 z-50 pointer-events-none">
             <img src="logo.jpg" alt="SubMe!" class="h-10 pointer-events-auto" onerror="this.outerHTML='<h1 class=\'text-2xl font-black italic\'>SubMe!</h1>'">
         </header>
-
         <div class="video-container" id="mainFeed">
-            <div id="emptyFeed" class="h-full flex flex-col items-center justify-center p-10 text-center">
-                <i data-lucide="clapperboard" class="w-20 h-20 mb-4 text-zinc-700"></i>
-                <h2 class="text-xl font-bold mb-2">Лента пуста</h2>
-                <p class="text-zinc-500 mb-6">Загрузи свое первое видео, чтобы начать!</p>
-                <button onclick="openUpload()" class="bg-white text-black px-6 py-3 rounded-2xl font-bold">Загрузить</button>
+            <div id="emptyFeed" class="h-full flex flex-col items-center justify-center p-10 text-center text-zinc-600">
+                <i data-lucide="clapperboard" class="w-16 h-16 mb-4"></i>
+                <p>Нет видео. Будь первым — загрузи контент!</p>
             </div>
         </div>
     </div>
 
-    <div id="view-profile" class="view-content view-hidden bg-black overflow-y-auto">
-        <div class="p-6 pt-12 flex flex-col items-center">
-            <div class="relative group" onclick="document.getElementById('avatarInp').click()">
-                <div id="p-avatar-box" class="w-28 h-28 rounded-full bg-zinc-800 flex items-center justify-center text-4xl font-black border-4 border-white/10 overflow-hidden">
+    <div id="view-profile" class="view-content view-hidden bg-black overflow-y-auto pt-12">
+        <div class="p-6 flex flex-col items-center">
+            <div class="relative" onclick="document.getElementById('avatarInp').click()">
+                <div id="p-avatar-box" class="w-24 h-24 rounded-full bg-zinc-800 flex items-center justify-center text-3xl font-bold border-4 border-white/10 overflow-hidden">
                     <span id="p-avatar-text">A</span>
                     <img id="p-avatar-img" class="hidden w-full h-full object-cover">
                 </div>
-                <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                    <i data-lucide="camera" class="w-6 h-6"></i>
-                </div>
                 <input type="file" id="avatarInp" accept="image/*" class="hidden" onchange="updateAvatar(this)">
             </div>
-
-            <div id="p-display" class="text-center mt-4">
-                <h2 id="p-name" class="text-2xl font-bold">@alan</h2>
-                <p id="p-bio" class="text-zinc-500 mt-2">Описание профиля...</p>
-                <button onclick="toggleEdit(true)" class="mt-6 px-10 py-2 bg-zinc-900 border border-white/10 rounded-xl font-bold">Редактировать</button>
+            <h2 id="p-name" class="text-2xl font-bold mt-4">@alan</h2>
+            <p id="p-bio" class="text-zinc-500 text-sm mt-1">Описание профиля...</p>
+            
+            <div class="flex gap-8 my-6 text-center w-full justify-center">
+                <div><div id="follower-count" class="font-bold">0</div><div class="text-[10px] text-zinc-500 uppercase">Подписчики</div></div>
+                <div><div id="total-likes" class="font-bold">0</div><div class="text-[10px] text-zinc-500 uppercase">Лайки</div></div>
             </div>
 
-            <div class="flex gap-8 my-8 text-center border-t border-white/5 pt-6 w-full justify-center">
-                <div><div id="follower-count" class="font-bold text-lg">0</div><div class="text-xs text-zinc-500">Подписчики</div></div>
-                <div><div class="font-bold text-lg">42</div><div class="text-xs text-zinc-500">Подписки</div></div>
-                <div><div id="total-likes" class="font-bold text-lg">0</div><div class="text-xs text-zinc-500">Лайки</div></div>
-            </div>
-
-            <div class="profile-grid" id="profileGrid">
-                </div>
-
-            <div id="p-edit" class="hidden w-full mt-6 flex flex-col gap-3">
-                <input id="in-name" type="text" class="bg-zinc-900 p-4 rounded-xl border border-white/10 outline-none focus:border-white/30" placeholder="Никнейм">
-                <textarea id="in-bio" class="bg-zinc-900 p-4 rounded-xl border border-white/10 outline-none focus:border-white/30" placeholder="О себе"></textarea>
-                <button onclick="saveProfile()" class="bg-white text-black font-bold py-4 rounded-xl mt-2">Сохранить</button>
+            <button onclick="toggleEdit(true)" class="w-full max-w-[200px] py-2 bg-zinc-900 rounded-lg font-bold text-sm border border-white/5 mb-8">Изм. профиль</button>
+            <div id="profileGrid" class="profile-grid"></div>
+            
+            <div id="p-edit" class="hidden fixed inset-0 bg-black z-[300] p-6 flex flex-col gap-4">
+                <h2 class="text-xl font-bold mb-4">Настройки</h2>
+                <input id="in-name" type="text" class="bg-zinc-900 p-4 rounded-xl outline-none" placeholder="Никнейм">
+                <textarea id="in-bio" class="bg-zinc-900 p-4 rounded-xl outline-none h-32" placeholder="О себе"></textarea>
+                <button onclick="saveProfile()" class="bg-white text-black font-bold py-4 rounded-xl">Сохранить</button>
+                <button onclick="toggleEdit(false)" class="text-zinc-500">Отмена</button>
             </div>
         </div>
     </div>
 
-    <div id="commentPanel" class="fixed bottom-0 left-0 right-0 bg-zinc-900 rounded-t-[32px] h-[70vh] flex flex-col p-6 shadow-2xl border-t border-white/10">
-        <div class="flex justify-between items-center mb-6">
-            <h3 class="font-bold text-lg">Комментарии <span id="commCount" class="text-zinc-500 ml-1">0</span></h3>
-            <button onclick="closeComments()" class="bg-zinc-800 p-2 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
-        </div>
-        <div id="commentList" class="flex-1 overflow-y-auto space-y-4 mb-4 pr-2"></div>
-        <div class="flex gap-2 items-center bg-black/40 p-2 rounded-2xl border border-white/5">
-            <input id="commentInp" type="text" class="flex-1 bg-transparent px-4 py-2 outline-none" placeholder="Добавить комментарий...">
+    <div id="commentPanel" class="fixed bottom-0 left-0 right-0 bg-zinc-900 rounded-t-[32px] h-[65vh] flex flex-col p-6 shadow-2xl border-t border-white/10">
+        <div class="flex justify-between items-center mb-4"><h3 class="font-bold">Комментарии</h3><button onclick="closeComments()"><i data-lucide="x"></i></button></div>
+        <div id="commentList" class="flex-1 overflow-y-auto space-y-3 mb-4"></div>
+        <div class="flex gap-2 bg-black/40 p-2 rounded-2xl border border-white/5">
+            <input id="commentInp" type="text" class="flex-1 bg-transparent px-4 py-2 outline-none" placeholder="Написать...">
             <button onclick="sendComment()" class="bg-white text-black p-2 rounded-xl"><i data-lucide="send" class="w-5 h-5"></i></button>
         </div>
     </div>
 
     <nav class="fixed bottom-0 w-full h-20 bg-black border-t border-white/5 flex justify-around items-center z-[150] px-6">
         <button onclick="switchView('home', this)" class="nav-item active text-zinc-500"><i data-lucide="home"></i></button>
-        <button onclick="openUpload()" class="bg-white text-black w-14 h-10 rounded-xl flex items-center justify-center -mt-4 shadow-lg active:scale-90 transition-transform">
-            <i data-lucide="plus" class="w-7 h-7"></i>
-        </button>
+        <button onclick="openUpload()" class="bg-white text-black w-12 h-9 rounded-lg flex items-center justify-center -mt-2"><i data-lucide="plus"></i></button>
         <button onclick="switchView('profile', this)" class="nav-item text-zinc-500"><i data-lucide="user"></i></button>
     </nav>
 
-    <div id="modalUpload" class="fixed inset-0 bg-black/98 z-[1000] hidden items-center justify-center p-6">
-        <div class="bg-zinc-900 w-full max-w-sm rounded-[32px] p-8 border border-white/10">
-            <h2 class="text-2xl font-bold mb-6 text-center">Новое видео</h2>
-            <div onclick="document.getElementById('f-video').click()" class="border-2 border-dashed border-zinc-700 h-48 rounded-[24px] flex flex-col items-center justify-center mb-6 hover:border-white/20 cursor-pointer">
-                <i data-lucide="upload-cloud" class="w-12 h-12 text-zinc-500 mb-2"></i>
-                <p id="f-stat" class="text-zinc-500 text-center px-4">Выбрать файл</p>
-                <input type="file" id="f-video" accept="video/*" class="hidden" onchange="document.getElementById('f-stat').innerText='Файл выбран!'">
-            </div>
-            <textarea id="f-desc" class="w-full bg-zinc-800 rounded-2xl p-4 text-sm mb-6 outline-none h-24" placeholder="Описание..."></textarea>
-            <button onclick="publish()" class="w-full bg-white text-black font-bold py-4 rounded-2xl active:scale-95 transition-transform">ОПУБЛИКОВАТЬ</button>
-            <button onclick="document.getElementById('modalUpload').style.display='none'" class="w-full mt-4 text-zinc-500">Отмена</button>
+    <div id="modalUpload" class="fixed inset-0 bg-black/95 z-[1000] hidden items-center justify-center p-6">
+        <div class="bg-zinc-900 w-full max-w-sm rounded-[32px] p-6 border border-white/10">
+            <h2 class="text-xl font-bold mb-4 text-center">Загрузить видео</h2>
+            <input type="file" id="f-video" accept="video/*" class="mb-4 text-sm w-full">
+            <textarea id="f-desc" class="w-full bg-zinc-800 rounded-xl p-3 text-sm mb-4 outline-none h-20" placeholder="Описание..."></textarea>
+            <button onclick="publish()" class="w-full bg-white text-black font-bold py-3 rounded-xl">ОПУБЛИКОВАТЬ</button>
+            <button onclick="document.getElementById('modalUpload').style.display='none'" class="w-full mt-2 text-zinc-500">Отмена</button>
         </div>
     </div>
 
     <script>
         lucide.createIcons();
 
-        // 1. НАВИГАЦИЯ
+        // --- ЛОГИКА ПЕРЕКЛЮЧЕНИЯ И ССЫЛОК ---
         function switchView(id, btn) {
             document.querySelectorAll('.view-content').forEach(v => v.classList.add('view-hidden'));
             document.getElementById('view-' + id).classList.remove('view-hidden');
-            if(btn) {
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-                btn.classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+
+            // Обновляем ссылку в браузере (как в WinTube)
+            const url = new URL(window.location);
+            if (id === 'profile') {
+                const name = document.getElementById('p-name').innerText.replace('@', '');
+                url.searchParams.set('user', name);
+                url.searchParams.delete('video');
+            } else {
+                url.searchParams.delete('user');
+                url.searchParams.delete('video');
             }
+            window.history.pushState({}, '', url);
+            
             if(id !== 'home') document.querySelectorAll('video').forEach(v => v.pause());
             closeComments();
         }
 
-        // 2. ПРОФИЛЬ
-        function toggleEdit(show) {
-            document.getElementById('p-display').classList.toggle('hidden', show);
-            document.getElementById('p-edit').classList.toggle('hidden', !show);
-            if(show) {
-                document.getElementById('in-name').value = document.getElementById('p-name').innerText.replace('@', '');
-                document.getElementById('in-bio').value = document.getElementById('p-bio').innerText;
+        // Обработка ссылок при загрузке
+        window.addEventListener('load', () => {
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('user')) {
+                switchView('profile');
+            } else if (params.has('video')) {
+                const vidIdx = params.get('video');
+                // Логика прокрутки к видео, если видео уже загружены
             }
-        }
+        });
 
+        // --- ФУНКЦИИ ПРОФИЛЯ ---
+        function toggleEdit(show) { document.getElementById('p-edit').classList.toggle('hidden', !show); }
         function saveProfile() {
-            const name = document.getElementById('in-name').value || 'alan';
-            const bio = document.getElementById('in-bio').value || '';
-            document.getElementById('p-name').innerText = '@' + name;
-            document.getElementById('p-bio').innerText = bio;
-            if(!document.getElementById('p-avatar-img').src) {
-                document.getElementById('p-avatar-text').innerText = name[0].toUpperCase();
-            }
+            const n = document.getElementById('in-name').value || 'alan';
+            const b = document.getElementById('in-bio').value || '';
+            document.getElementById('p-name').innerText = '@' + n;
+            document.getElementById('p-bio').innerText = b;
             toggleEdit(false);
+            // Обновляем URL сразу после смены имени
+            const url = new URL(window.location);
+            url.searchParams.set('user', n);
+            window.history.replaceState({}, '', url);
         }
 
         function updateAvatar(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    const avatarImg = document.getElementById('p-avatar-img');
-                    avatarImg.src = e.target.result;
-                    avatarImg.classList.remove('hidden');
+                    const img = document.getElementById('p-avatar-img');
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
                     document.getElementById('p-avatar-text').classList.add('hidden');
                 };
                 reader.readAsDataURL(input.files[0]);
             }
         }
 
-        // 3. КОММЕНТАРИИ
-        function openComments(e) { e.stopPropagation(); document.getElementById('commentPanel').classList.add('active'); }
-        function closeComments() { document.getElementById('commentPanel').classList.remove('active'); }
-        function sendComment() {
-            const inp = document.getElementById('commentInp');
-            if(!inp.value) return;
-            const list = document.getElementById('commentList');
+        // --- ВИДЕО И ЛАЙКИ ---
+        function publish() {
+            const file = document.getElementById('f-video').files[0];
+            const desc = document.getElementById('f-desc').value;
+            if(!file) return alert('Выбери файл!');
+            
+            document.getElementById('emptyFeed').classList.add('hidden');
+            const url = URL.createObjectURL(file);
             const user = document.getElementById('p-name').innerText;
-            const div = document.createElement('div');
-            div.className = 'bg-zinc-800/50 p-4 rounded-2xl';
-            div.innerHTML = `<div class="font-bold text-xs text-zinc-400 mb-1">${user}</div><div>${inp.value}</div>`;
-            list.prepend(div);
-            inp.value = '';
-            document.getElementById('commCount').innerText = list.children.length;
+            const avatar = document.getElementById('p-avatar-img').src;
+
+            const sec = document.createElement('section');
+            sec.className = 'video-section';
+            const vidId = document.querySelectorAll('.video-section').length + 1;
+            
+            sec.innerHTML = `
+                <video src="${url}" loop playsinline autoplay onclick="this.paused?this.play():this.pause()"></video>
+                <div class="absolute right-4 bottom-28 flex flex-col gap-6 items-center z-10">
+                    <div class="relative mb-2" onclick="switchView('profile')">
+                        <div class="w-12 h-12 rounded-full border-2 border-white bg-zinc-800 overflow-hidden flex items-center justify-center font-bold">
+                            ${avatar ? `<img src="${avatar}" class="w-full h-full object-cover">` : `<span>${user[1]}</span>`}
+                        </div>
+                        <div class="sub-badge" onclick="subscribe(this, event)"><i data-lucide="plus" class="w-3 h-3 text-white"></i></div>
+                    </div>
+                    <div class="flex flex-col items-center" onclick="toggleLike(this, event)">
+                        <i data-lucide="heart" class="w-9 h-9"></i>
+                        <span class="count text-xs font-bold">0</span>
+                    </div>
+                    <div class="flex flex-col items-center" onclick="openComments(event)">
+                        <i data-lucide="message-circle" class="w-9 h-9"></i>
+                        <span class="text-xs font-bold">0</span>
+                    </div>
+                    <div class="flex flex-col items-center" onclick="shareVid(${vidId})">
+                        <i data-lucide="share-2" class="w-9 h-9"></i>
+                    </div>
+                </div>
+                <div class="absolute bottom-28 left-6 right-20 pointer-events-none">
+                    <h3 class="font-bold text-lg">${user}</h3>
+                    <p class="text-sm opacity-80">${desc}</p>
+                </div>
+            `;
+            
+            document.getElementById('mainFeed').prepend(sec);
+            const gi = document.createElement('div');
+            gi.className = 'grid-item';
+            gi.innerHTML = `<video src="${url}" class="w-full h-full object-cover" muted></video>`;
+            document.getElementById('profileGrid').prepend(gi);
+            
+            lucide.createIcons();
+            document.getElementById('modalUpload').style.display = 'none';
+            switchView('home');
         }
 
-        // 4. ЛАЙКИ И ПОДПИСКИ
         function toggleLike(btn, e) {
             e.stopPropagation();
             const icon = btn.querySelector('svg');
             const num = btn.querySelector('.count');
-            const totalLikes = document.getElementById('total-likes');
+            const total = document.getElementById('total-likes');
             let val = parseInt(num.innerText);
-            let totalVal = parseInt(totalLikes.innerText);
-
             if(icon.classList.contains('fill-red-500')) {
                 icon.classList.remove('fill-red-500', 'text-red-500');
                 num.innerText = val - 1;
-                totalLikes.innerText = totalVal - 1;
+                total.innerText = parseInt(total.innerText) - 1;
             } else {
                 icon.classList.add('fill-red-500', 'text-red-500');
                 num.innerText = val + 1;
-                totalLikes.innerText = totalVal + 1;
+                total.innerText = parseInt(total.innerText) + 1;
                 popHeart(e);
             }
         }
@@ -209,87 +232,37 @@
         function popHeart(e) {
             const h = document.createElement('div');
             h.className = 'heart-pop';
-            h.innerHTML = `<i data-lucide="heart" style="width:100px; height:100px;"></i>`;
-            h.style.left = (e.clientX - 50) + 'px';
-            h.style.top = (e.clientY - 50) + 'px';
-            document.body.appendChild(h);
-            lucide.createIcons();
+            h.innerHTML = `<i data-lucide="heart" style="width:80px; height:80px;"></i>`;
+            h.style.left = (e.clientX - 40) + 'px'; h.style.top = (e.clientY - 40) + 'px';
+            document.body.appendChild(h); lucide.createIcons();
             setTimeout(() => h.remove(), 600);
         }
 
         function subscribe(el, e) {
             e.stopPropagation();
             el.style.display = 'none';
-            const fCount = document.getElementById('follower-count');
-            fCount.innerText = parseInt(fCount.innerText) + 1;
+            const c = document.getElementById('follower-count');
+            c.innerText = parseInt(c.innerText) + 1;
         }
 
-        // 5. ЗАГРУЗКА
+        function shareVid(id) {
+            const url = new URL(window.location);
+            url.searchParams.set('video', id);
+            navigator.clipboard.writeText(url.href);
+            alert("Ссылка на видео скопирована!");
+        }
+
+        // Комменты
+        function openComments(e) { e.stopPropagation(); document.getElementById('commentPanel').classList.add('active'); }
+        function closeComments() { document.getElementById('commentPanel').classList.remove('active'); }
+        function sendComment() {
+            const i = document.getElementById('commentInp'); if(!i.value) return;
+            const d = document.createElement('div');
+            d.innerHTML = `<b class="text-xs">@вы:</b> <p class="text-sm">${i.value}</p>`;
+            document.getElementById('commentList').prepend(d);
+            i.value = '';
+        }
         function openUpload() { document.getElementById('modalUpload').style.display='flex'; }
-        
-        function publish() {
-            const file = document.getElementById('f-video').files[0];
-            const desc = document.getElementById('f-desc').value;
-            if(!file) return alert('Выбери видео!');
-            
-            document.getElementById('emptyFeed').classList.add('hidden');
-            const url = URL.createObjectURL(file);
-            const user = document.getElementById('p-name').innerText;
-            const avatarSrc = document.getElementById('p-avatar-img').src;
-
-            const sec = document.createElement('section');
-            sec.className = 'video-section';
-            sec.onclick = (e) => { 
-                const v = sec.querySelector('video');
-                if(e.detail === 2) popHeart(e);
-                else v.paused ? v.play() : v.pause();
-            };
-            
-            sec.innerHTML = `
-                <video src="${url}" loop playsinline autoplay></video>
-                <div class="absolute right-4 bottom-28 flex flex-col gap-6 items-center z-10">
-                    <div class="relative mb-2 pointer-events-auto" onclick="switchView('profile')">
-                        <div class="w-12 h-12 rounded-full border-2 border-white bg-zinc-800 overflow-hidden flex items-center justify-center font-bold">
-                            ${avatarSrc ? `<img src="${avatarSrc}" class="w-full h-full object-cover">` : `<span>${user[1].toUpperCase()}</span>`}
-                        </div>
-                        <div class="sub-badge" onclick="subscribe(this, event)"><i data-lucide="plus" class="w-3 h-3"></i></div>
-                    </div>
-                    <div class="flex flex-col items-center pointer-events-auto" onclick="toggleLike(this, event)">
-                        <i data-lucide="heart" class="w-10 h-10"></i>
-                        <span class="count text-xs font-bold mt-1">0</span>
-                    </div>
-                    <div class="flex flex-col items-center pointer-events-auto" onclick="openComments(event)">
-                        <i data-lucide="message-circle" class="w-10 h-10"></i>
-                        <span class="text-xs font-bold mt-1">0</span>
-                    </div>
-                </div>
-                <div class="absolute bottom-28 left-6 right-20 pointer-events-none">
-                    <h3 class="font-bold text-xl pointer-events-auto">${user}</h3>
-                    <p class="text-base mt-2 opacity-90">${desc}</p>
-                </div>
-            `;
-            
-            document.getElementById('mainFeed').prepend(sec);
-
-            // Добавление в сетку профиля
-            const grid = document.getElementById('profileGrid');
-            const item = document.createElement('div');
-            item.className = 'grid-item';
-            item.innerHTML = `<video src="${url}" class="w-full h-full object-cover muted"></video>`;
-            grid.prepend(item);
-
-            lucide.createIcons();
-            document.getElementById('modalUpload').style.display = 'none';
-            switchView('home');
-            obs.observe(sec);
-        }
-
-        const obs = new IntersectionObserver(es => {
-            es.forEach(e => {
-                const v = e.target.querySelector('video');
-                if(v) e.isIntersecting ? v.play() : v.pause();
-            });
-        }, {threshold: 0.8});
     </script>
 </body>
 </html>
